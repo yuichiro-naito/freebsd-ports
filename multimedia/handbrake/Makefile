@@ -3,8 +3,6 @@
 PORTNAME=	handbrake
 DISTVERSION=	1.5.1
 CATEGORIES=	multimedia
-MASTER_SITES=	https://github.com/${GH_ACCOUNT}/${GH_PROJECT}-contribs/releases/download/contribs/:contrib
-DISTFILES=	${CONTRIB_FILES:S/$/:contrib/}
 DIST_SUBDIR=	${PORTNAME}
 
 MAINTAINER=	naito.yuichiro@gmail.com
@@ -55,8 +53,10 @@ CONTRIB_FILES=	fdk-aac-2.0.1.tar.gz \
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	HandBrake
-GH_PROJECT=	HandBrake
-GH_ASSET=	${GH_PROJECT}-${DISTVERSION}-source
+GH_PROJECT=	HandBrake HandBrake-contribs:contrib
+GH_TAGNAME=	contribs:contrib
+GH_ASSET=	${GH_ACCOUNT}-${DISTVERSION}-source${EXTRACT_SUFX} \
+		${CONTRIB_FILES:S/$/:contrib/}
 
 .if !defined(PACKAGE_BUILDING)
 # DVDCSS version hardcoded in contrib/libdvdread/libdvdread-5.0.0-6-gcb1ae87/src/dvd_input.c (dlopen'ed)

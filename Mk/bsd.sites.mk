@@ -411,9 +411,10 @@ GH_PROJECT?=	${GH_PROJECT_DEFAULT}
 # Use full PREFIX/SUFFIX and converted DISTVERSION
 GH_TAGNAME_DEFAULT=	${DISTVERSIONFULL}
 GH_TAGNAME?=	${GH_TAGNAME_DEFAULT}
-# Iterate over GH_ACCOUNT, GH_PROJECT, GH_TAGNAME and GH_SUBDIR to extract groups
+# Iterate over GH_ACCOUNT, GH_PROJECT, GH_TAGNAME, GH_SUBDIR,
+# and GH_ASSET to extract groups
 _GITHUB_GROUPS= DEFAULT
-.  for _gh_v in GH_ACCOUNT GH_PROJECT GH_TAGNAME GH_SUBDIR
+.  for _gh_v in GH_ACCOUNT GH_PROJECT GH_TAGNAME GH_SUBDIR GH_ASSET
 .    for _v_ex in ${${_gh_v}}
 _GH_GROUPS=	${_v_ex:S/^${_v_ex:C@:[^/:]+$@@}//:S/^://}
 .      if !empty(_GH_GROUPS)
@@ -427,7 +428,7 @@ check-makevars::
 .          if !${_GITHUB_GROUPS:M${_group}}
 _GITHUB_GROUPS+=	${_group}
 .          endif
-${_gh_v}_${_group}=	${_v_ex:C@^(.*):[^/:]+$@\1@}
+${_gh_v}_${_group}+=	${_v_ex:C@^(.*):[^/:]+$@\1@}
 .        endfor
 .      else
 ${_gh_v}_DEFAULT=	${_v_ex:C@^(.*):[^/:]+$@\1@}
@@ -440,6 +441,7 @@ GH_ACCOUNT:=	${GH_ACCOUNT_DEFAULT}
 GH_PROJECT:=	${GH_PROJECT_DEFAULT}
 GH_TAGNAME:=	${GH_TAGNAME_DEFAULT}
 GH_SUBDIR:=	${GH_SUBDIR_DEFAULT}
+GH_ASSET:=	${GH_ASSET_DEFAULT}
 .  if defined(GH_TAGNAME)
 # If you change either of the _SANITIZED or _EXTRACT variables, please keep the
 # changes in sync with the GH_TAGNAME_${_group}_* variables 50 lines below.
@@ -460,8 +462,6 @@ _PORTS_DIRECTORIES+=	${_GITHUB_CLONE_DIR}
 # GH_TAGNAME defaults to DISTVERSIONFULL; Avoid adding DISTVERSIONFULL in twice
 .    if ${GH_TAGNAME} != ${DISTVERSIONFULL}
 DISTNAME=	${GH_ACCOUNT}-${GH_PROJECT}-${DISTVERSIONFULL}-${GH_TAGNAME_SANITIZED}
-.    elif !empty(GH_ASSET)
-DISTNAME=	${GH_ASSET}
 .    else
 DISTNAME=	${GH_ACCOUNT}-${GH_PROJECT}-${GH_TAGNAME_SANITIZED}
 .    endif
@@ -469,8 +469,8 @@ DISTNAME=	${GH_ACCOUNT}-${GH_PROJECT}-${GH_TAGNAME_SANITIZED}
 DISTNAME_DEFAULT:=	${DISTNAME}_GH${_GITHUB_REV}
 DISTFILE_DEFAULT=	${DISTNAME_DEFAULT}${_GITHUB_EXTRACT_SUFX}
 .    else
-DISTNAME_DEFAULT:=	${DISTNAME}
-DISTFILE_DEFAULT=	${DISTNAME_DEFAULT}${EXTRACT_SUFX}
+DISTNAME_DEFAULT:=	# empty
+DISTFILE_DEFAULT=	${GH_ASSET}
 .    endif
 DISTNAME:=	${DISTNAME_DEFAULT}
 DISTFILES+=	${DISTFILE_DEFAULT}
@@ -506,18 +506,17 @@ GH_ASSET_${_group}?=	${GH_ASSET_DEFAULT}
 GH_TAGNAME_${_group}_SANITIZED=	${GH_TAGNAME_${_group}:S,/,-,g}
 GH_TAGNAME_${_group}_EXTRACT=	${GH_TAGNAME_${_group}_SANITIZED:C/^[vV]([0-9])/\1/:S/+/-/g:C/--*/-/g}
 _GH_TUPLE_OUT:=	${_GH_TUPLE_OUT} ${GH_ACCOUNT_${_group}}:${GH_PROJECT_${_group}}:${GH_TAGNAME_${_group}}:${_group}/${GH_SUBDIR_${_group}}
-.      if empty(GH_ASSET_${group})
+.      if empty(GH_ASSET_${_group})
 DISTNAME_${_group}:=	${GH_ACCOUNT_${_group}}-${GH_PROJECT_${_group}}-${GH_TAGNAME_${_group}_SANITIZED}
 DISTFILE_${_group}:=	${DISTNAME_${_group}}_GH${_GITHUB_REV}${_GITHUB_EXTRACT_SUFX}
 DISTFILES:=	${DISTFILES} ${DISTFILE_${_group}}:${_group}
 MASTER_SITES:=	${MASTER_SITES} ${MASTER_SITE_GITHUB:S@%SUBDIR%@${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}/tar.gz/${GH_TAGNAME_${_group}}?dummy=/:${_group}@}
 WRKSRC_${_group}:=	${WRKDIR}/${GH_PROJECT_${_group}}-${GH_TAGNAME_${_group}_EXTRACT}
 .      else
-DISTNAME_${_group}:=	${GH_ASSET_${_group}}
-DISTFILE_${_group}:=	${DISTNAME_${_group}}${EXTRACT_SUFX}
-DISTFILES:=	${DISTFILES} ${DISTFILE_${_group}}:${_group}
-MASTER_SITES:=	${MASTER_SITES} ${MASTER_SITE_GITHUB:S@%SUBDIR%@${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}/releases/download/${GH_TAGNAME_${_group}}/${DISTFILE_${_group}}:${_group}@}
-WRKSRC_${_group}:=	${WRKDIR}/${DISTNAME_${_group}}
+DISTFILE_${_group}:=	${GH_ASSET_${_group}}
+DISTFILES:=	${DISTFILES} ${DISTFILE_${_group}:S/$/:${_group}/}
+MASTER_SITES:=	${MASTER_SITES} ${MASTER_SITE_GITHUB_ASSET:S@%SUBDIR%@${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}/releases/download/${GH_TAGNAME_${_group}}/:${_group}@}
+WRKSRC_${_group}:=	${WRKDIR}/${GH_ASSET_${_group}_EXTRACT}
 .      endif
 .      if !empty(GH_SUBDIR_${_group})
 # In order to sort the subdir extraction so that foo/bar is moved in before
