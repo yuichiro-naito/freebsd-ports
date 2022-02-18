@@ -3,7 +3,6 @@
 PORTNAME=	milter-manager
 DISTVERSION=	2.1.6
 CATEGORIES=	mail ruby
-MASTER_SITES=	https://github.com/${PORTNAME}/${PORTNAME}/releases/download/${DISTVERSION}/
 
 MAINTAINER=	ports@FreeBSD.org
 COMMENT=	Super milter that can invoke several milters selectively
@@ -21,6 +20,8 @@ USE_GNOME=	glib20 intltool
 USE_LDCONFIG=	yes
 USE_RC_SUBR=	milter-manager
 USE_RUBY=	yes
+USE_GITHUB=	yes
+GH_ASSET=	${PORTNAME}-${DISTVERSION}
 
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-html-dir=${DOCSDIR} \
