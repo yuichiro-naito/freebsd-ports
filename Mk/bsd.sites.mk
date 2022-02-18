@@ -360,6 +360,11 @@ DEV_WARNING+=	"MASTER_SITES contains ${MASTER_SITES:M*/github.com/*/archive/*}, 
 #                 possible to do GH_TAGNAME= GIT_HASH to do a snapshot.
 #                 default: ${DISTVERSIONFULL}
 #
+# GH_ASSET	- name of the release asset
+#		  default: none
+#		  When specified, it will be used as DISTNAME and the distfile
+#		  will be retrieved from the release asset.
+#
 # GH_SUBDIR     - directory relative to WRKSRC where to move this distfile's
 #                 content after extracting.
 #
@@ -390,9 +395,14 @@ GH_SUBDIR+=	${GH_TUPLE:C@^([^:]*):([^:]*):([^:]*)((:[^:/]*)?)((/.*)?)@\6\4@:M/*:
 # comment #15 for explanation as to why and how to deal with it if it breaks.
 MASTER_SITE_GITHUB+=		https://codeload.github.com/%SUBDIR%
 MASTER_SITE_GITHUB_CLOUD+=	https://cloud.github.com/downloads/%SUBDIR%
+MASTER_SITE_GITHUB_ASSET+=	https://github.com/%SUBDIR%
 
-.  if !defined(MASTER_SITES) || !${MASTER_SITES:MGH} && !${MASTER_SITES:MGHC} && !${USE_GITHUB:Mnodefault}
+.  if !defined(MASTER_SITES) || !${MASTER_SITES:MGH} && !${MASTER_SITES:MGHC} && !${MASTER_SITES:MGHA} && !${USE_GITHUB:Mnodefault}
+.    if empty(GH_ASSET)
 MASTER_SITES+=	GH
+.    else
+MASTER_SITES+=	GHA
+.    endif
 .  endif
 GH_ACCOUNT_DEFAULT=	${PORTNAME}
 GH_ACCOUNT?=	${GH_ACCOUNT_DEFAULT}
@@ -450,17 +460,29 @@ _PORTS_DIRECTORIES+=	${_GITHUB_CLONE_DIR}
 # GH_TAGNAME defaults to DISTVERSIONFULL; Avoid adding DISTVERSIONFULL in twice
 .    if ${GH_TAGNAME} != ${DISTVERSIONFULL}
 DISTNAME=	${GH_ACCOUNT}-${GH_PROJECT}-${DISTVERSIONFULL}-${GH_TAGNAME_SANITIZED}
+.    elif !empty(GH_ASSET)
+DISTNAME=	${GH_ASSET}
 .    else
 DISTNAME=	${GH_ACCOUNT}-${GH_PROJECT}-${GH_TAGNAME_SANITIZED}
 .    endif
+.    if empty(GH_ASSET)
 DISTNAME_DEFAULT:=	${DISTNAME}_GH${_GITHUB_REV}
 DISTFILE_DEFAULT=	${DISTNAME_DEFAULT}${_GITHUB_EXTRACT_SUFX}
+.    else
+DISTNAME_DEFAULT:=	${DISTNAME}
+DISTFILE_DEFAULT=	${DISTNAME_DEFAULT}${EXTRACT_SUFX}
+.    endif
 DISTNAME:=	${DISTNAME_DEFAULT}
 DISTFILES+=	${DISTFILE_DEFAULT}
 git-clone: git-clone-DEFAULT
+.    if !empty(GH_ASSET)
 git-clone-DEFAULT: ${_GITHUB_CLONE_DIR}
 	@git clone https://github.com/${GH_ACCOUNT_DEFAULT}/${GH_PROJECT_DEFAULT}.git ${_GITHUB_CLONE_DIR}/${GH_PROJECT_DEFAULT}
 	@${ECHO_MSG} "Cloned the default github repository into ${_GITHUB_CLONE_DIR}/${GH_PROJECT_DEFAULT}" | ${FMT_80}
+.    else
+git-clone-DEFAULT:
+	@${DO_NADA}
+.    endif
 .  endif
 .  if !empty(GH_SUBDIR)
 _SITES_extract:=	690:post-extract-gh-DEFAULT
@@ -478,16 +500,25 @@ post-extract-gh-DEFAULT:
 GH_ACCOUNT_${_group}?=	${GH_ACCOUNT_DEFAULT}
 GH_PROJECT_${_group}?=	${GH_PROJECT_DEFAULT}
 GH_TAGNAME_${_group}?=	${GH_TAGNAME_DEFAULT}
+GH_ASSET_${_group}?=	${GH_ASSET_DEFAULT}
 # If you change either of the _SANITIZED or _EXTRACT variables, please keep the
 # changes in sync with the GH_TAGNAME_* variables 50 lines above.
 GH_TAGNAME_${_group}_SANITIZED=	${GH_TAGNAME_${_group}:S,/,-,g}
 GH_TAGNAME_${_group}_EXTRACT=	${GH_TAGNAME_${_group}_SANITIZED:C/^[vV]([0-9])/\1/:S/+/-/g:C/--*/-/g}
 _GH_TUPLE_OUT:=	${_GH_TUPLE_OUT} ${GH_ACCOUNT_${_group}}:${GH_PROJECT_${_group}}:${GH_TAGNAME_${_group}}:${_group}/${GH_SUBDIR_${_group}}
+.      if empty(GH_ASSET_${group})
 DISTNAME_${_group}:=	${GH_ACCOUNT_${_group}}-${GH_PROJECT_${_group}}-${GH_TAGNAME_${_group}_SANITIZED}
 DISTFILE_${_group}:=	${DISTNAME_${_group}}_GH${_GITHUB_REV}${_GITHUB_EXTRACT_SUFX}
 DISTFILES:=	${DISTFILES} ${DISTFILE_${_group}}:${_group}
 MASTER_SITES:=	${MASTER_SITES} ${MASTER_SITE_GITHUB:S@%SUBDIR%@${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}/tar.gz/${GH_TAGNAME_${_group}}?dummy=/:${_group}@}
 WRKSRC_${_group}:=	${WRKDIR}/${GH_PROJECT_${_group}}-${GH_TAGNAME_${_group}_EXTRACT}
+.      else
+DISTNAME_${_group}:=	${GH_ASSET_${_group}}
+DISTFILE_${_group}:=	${DISTNAME_${_group}}${EXTRACT_SUFX}
+DISTFILES:=	${DISTFILES} ${DISTFILE_${_group}}:${_group}
+MASTER_SITES:=	${MASTER_SITES} ${MASTER_SITE_GITHUB:S@%SUBDIR%@${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}/releases/download/${GH_TAGNAME_${_group}}/${DISTFILE_${_group}}:${_group}@}
+WRKSRC_${_group}:=	${WRKDIR}/${DISTNAME_${_group}}
+.      endif
 .      if !empty(GH_SUBDIR_${_group})
 # In order to sort the subdir extraction so that foo/bar is moved in before
 # foo/bar/baz, we count the number of / in the path and use it to order the
@@ -500,9 +531,14 @@ post-extract-gh-${_group}:
 	@${LN} -s ${WRKSRC:T}/${GH_SUBDIR_${_group}} ${WRKSRC_${_group}}
 .      endif
 git-clone: git-clone-${_group}
+.      if empty(GH_ASSET)
 git-clone-${_group}: ${_GITHUB_CLONE_DIR}
 	@git clone https://github.com/${GH_ACCOUNT_${_group}}/${GH_PROJECT_${_group}}.git ${_GITHUB_CLONE_DIR}/${GH_PROJECT_${_group}}
 	@${ECHO_MSG} "Cloned the ${_group} github repository into ${_GITHUB_CLONE_DIR}/${GH_PROJECT_${_group}}" | ${FMT_80}
+.      else
+git-clone-${_group}:
+	@${DO_NADA}
+.      endif
 .    endfor
 .  endif
 convert-to-gh-tuple:
@@ -1234,6 +1270,7 @@ MASTER_SITE_ZI+= \
 
 MASTER_SITES_ABBREVS=	CPAN:PERL_CPAN \
 			GH:GITHUB \
+			GHA:GITHUB_ASSET \
 			GHC:GITHUB_CLOUD \
 			LODEV:LIBREOFFICE_DEV \
 			NL:NETLIB \
@@ -1252,6 +1289,7 @@ MASTER_SITES_SUBDIRS=	APACHE_COMMONS_BINARIES:${PORTNAME:S,commons-,,} \
 			GENTOO:distfiles \
 			GIMP:${PORTNAME}/${PORTVERSION:R}/ \
 			GITHUB:${GH_ACCOUNT}/${GH_PROJECT}/tar.gz/${GH_TAGNAME}?dummy=/ \
+			GITHUB_ASSET:${GH_ACCOUNT}/${GH_PROJECT}/releases/download/${GH_TAGNAME}/ \
 			GITHUB_CLOUD:${GH_ACCOUNT}/${GH_PROJECT}/ \
 			GNOME:sources/${PORTNAME}/${PORTVERSION:C/^([0-9]+\.[0-9]+).*/\1/} \
 			GNU:${PORTNAME} \
