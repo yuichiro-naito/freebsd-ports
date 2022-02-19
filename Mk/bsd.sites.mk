@@ -343,6 +343,9 @@ MASTER_SITE_GENTOO+= \
 .if !empty(MASTER_SITES:M*/github.com/*/archive/*)
 DEV_WARNING+=	"MASTER_SITES contains ${MASTER_SITES:M*/github.com/*/archive/*}, please use USE_GITHUB instead."
 .endif
+.if !empty(MASTER_SITES:M*/github.com/*/releases/download/*)
+DEV_WARNING+=	"MASTER_SITES contains ${MASTER_SITES:M*/github.com/*/releases/download/*}, please use USE_GITHUB and GH_ASSET instead."
+.endif
 
 .if !defined(IGNORE_MASTER_SITE_GITHUB)
 #
@@ -362,8 +365,10 @@ DEV_WARNING+=	"MASTER_SITES contains ${MASTER_SITES:M*/github.com/*/archive/*}, 
 #
 # GH_ASSET	- name of the release asset
 #		  default: none
-#		  When specified, it will be used as DISTNAME and the distfile
-#		  will be retrieved from the release asset.
+#		  When specified, it will be used as DISTFILES and
+#		  they will be retrieved from the release asset directory.
+#		  The URL for the release asset directory is defined in
+#		  MASTER_SITE_GITHUB_ASSET.
 #
 # GH_SUBDIR     - directory relative to WRKSRC where to move this distfile's
 #                 content after extracting.
@@ -383,6 +388,10 @@ _t_tmp=${_tuple}
 check-makevars::
 	@${ECHO_MSG} "The ${_tuple} GH_TUPLE line has"
 	@${ECHO_MSG} "a tag containing something else than [a-zA-Z0-9_]"
+	@${FALSE}
+.      elif !empty(_t_tmp:C@^([^:]*):([^:]*):([^:]*)((:[^:/]*)?)((/.*)?)@\1\2\3@:M*\:*)
+check-makevars::
+	@${ECHO_MSG} "The ${_tuple} GH_TUPLE line is invalid or empty"
 	@${FALSE}
 .      endif
 .    endfor

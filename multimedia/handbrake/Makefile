@@ -52,10 +52,9 @@ CONTRIB_FILES=	fdk-aac-2.0.1.tar.gz \
 		zimg-3.0.3.tar.gz
 
 USE_GITHUB=	yes
-GH_ACCOUNT=	HandBrake
-GH_PROJECT=	HandBrake HandBrake-contribs:contrib
-GH_TAGNAME=	contribs:contrib
-GH_ASSET=	${GH_ACCOUNT}-${DISTVERSION}-source${EXTRACT_SUFX} \
+GH_TUPLE=	HandBrake:HandBrake: \
+		HandBrake:HandBrake-contribs:contribs:contrib
+GH_ASSET=	HandBrake-${DISTVERSION}-source${EXTRACT_SUFX} \
 		${CONTRIB_FILES:S/$/:contrib/}
 
 .if !defined(PACKAGE_BUILDING)
