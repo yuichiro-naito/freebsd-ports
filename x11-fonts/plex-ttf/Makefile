@@ -1,7 +1,8 @@
 PORTNAME=	plex-ttf
 DISTVERSION=	6.0.0
+DISTVERSIONPREFIX= v
 CATEGORIES=	x11-fonts
-MASTER_SITES=	https://github.com/IBM/plex/releases/download/v${DISTVERSION}/TrueType${EXTRACT_SUFX}?dummy=/
+DIST_SUBDIR=   ${PORTNAME}-${DISTVERSION}
 
 MAINTAINER=	delphij@FreeBSD.org
 COMMENT=	IBM's signature typeface
@@ -13,6 +14,11 @@ USES=		fonts zip
 NO_ARCH=	yes
 NO_BUILD=	yes
 NO_WRKSUBDIR=	yes
+
+USE_GITHUB=	yes
+GH_ACCOUNT=	IBM
+GH_PROJECT=	plex
+GH_ASSET=	TrueType${EXTRACT_SUFX}
 
 do-install:
 	@${MKDIR} ${STAGEDIR}${FONTSDIR}

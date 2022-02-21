@@ -3,10 +3,6 @@
 PORTNAME=	handbrake
 DISTVERSION=	1.5.1
 CATEGORIES=	multimedia
-MASTER_SITES=	https://github.com/HandBrake/HandBrake/releases/download/${DISTVERSION}/
-MASTER_SITES+=	https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs/:contrib
-DISTNAME=	HandBrake-${DISTVERSION}
-DISTFILES=	${DISTNAME}-source.tar.bz2 ${CONTRIB_FILES:S/$/:contrib/}
 DIST_SUBDIR=	${PORTNAME}
 
 MAINTAINER=	naito.yuichiro@gmail.com
@@ -43,7 +39,8 @@ LIB_DEPENDS=	libdbus-1.so:devel/dbus \
 		libjansson.so:devel/jansson
 
 USES=		autoreconf:build compiler:c11 gmake iconv libtool:build \
-		localbase:ldflags ninja:build pkgconfig python:3.6+,build
+		localbase:ldflags ninja:build pkgconfig python:3.6+,build \
+		tar:bz2
 
 CONTRIB_FILES=	fdk-aac-2.0.1.tar.gz \
 		ffmpeg-4.4.1.tar.bz2 \
@@ -53,6 +50,12 @@ CONTRIB_FILES=	fdk-aac-2.0.1.tar.gz \
 		dav1d-0.9.2.tar.bz2 \
 		x265_3.5.tar.gz \
 		zimg-3.0.3.tar.gz
+
+USE_GITHUB=	yes
+GH_TUPLE=	HandBrake:HandBrake: \
+		HandBrake:HandBrake-contribs:contribs:contrib
+GH_ASSET=	HandBrake-${DISTVERSION}-source${EXTRACT_SUFX} \
+		${CONTRIB_FILES:S/$/:contrib/}
 
 .if !defined(PACKAGE_BUILDING)
 # DVDCSS version hardcoded in contrib/libdvdread/libdvdread-5.0.0-6-gcb1ae87/src/dvd_input.c (dlopen'ed)
