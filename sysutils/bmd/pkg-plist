@@ -1,0 +1,9 @@
+etc/rc.d/bmd
+include/bmd_plugin.h
+man/man5/bmd.conf.5.gz
+man/man8/bmd.8.gz
+man/man8/bmdctl.8.gz
+sbin/bmd
+sbin/bmdctl
+@dir libexec/bmd
+@dir var/cache/bmd
