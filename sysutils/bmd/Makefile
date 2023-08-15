@@ -9,6 +9,9 @@ WWW=		https://github.com/yuichiro-naito/bmd
 LICENSE=	BSD2CLAUSE
 LICENSE_FILE=	${WRKSRC}/LICENSE
 
+# Because bhyve runs on amd64 only.
+ONLY_FOR_ARCHS=	amd64
+
 RUN_DEPENDS=	bhyve-firmware>0:sysutils/bhyve-firmware \
 		grub2-bhyve>0:sysutils/grub2-bhyve
 
