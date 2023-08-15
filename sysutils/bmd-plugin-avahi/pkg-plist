@@ -1,0 +1,4 @@
+libexec/bmd/libbmdplugin_avahi.a
+libexec/bmd/libbmdplugin_avahi.so
+libexec/bmd/libbmdplugin_avahi.so.1
+man/man8/bmd-plugin-avahi.8.gz
