@@ -7,6 +7,6 @@
 +BINGRP!=	id -g
 +SHAREOWN=	${BINOWN}
 +SHAREGRP=	${BINGRP}
- LIB=		bmdplugin_avahi
+ SHLIB=		bmdplugin_avahi
  SHLIB_MAJOR=	1
  CFLAGS+=	-I${LOCALBASE}/include -DLOCALBASE=\"${LOCALBASE}\"
