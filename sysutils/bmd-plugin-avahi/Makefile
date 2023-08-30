@@ -20,6 +20,6 @@ USE_GITHUB=	yes
 GH_ACCOUNT=	yuichiro-naito
 
 pre-install:
-	mkdir -p ${STAGEDIR}/${LOCALBASE}/libexec/bmd
+	${MKDIR} ${STAGEDIR}/${LOCALBASE}/libexec/bmd
 
 .include <bsd.port.mk>
