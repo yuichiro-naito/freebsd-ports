@@ -27,6 +27,7 @@ USE_LDCONFIG=	yes
 USE_XORG=	x11 xcb
 
 CMAKE_TESTING_ON=	BUILD_TESTS
+CONFLICTS=	multimedia/onevpl
 DATADIR=	${PREFIX}/share/vpl
 
 post-patch:
