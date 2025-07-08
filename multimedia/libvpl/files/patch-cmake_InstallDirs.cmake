@@ -1,0 +1,13 @@
+--- cmake/InstallDirs.cmake.orig	2025-04-18 15:44:33 UTC
++++ cmake/InstallDirs.cmake
+@@ -43,8 +43,8 @@ if(NOT VPL_INSTALL_PKGCONFIGDIR)
+ endif()
+ 
+ if(NOT VPL_INSTALL_PKGCONFIGDIR)
+-  set(VPL_INSTALL_PKGCONFIGDIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+-  set(VPL_INSTALL_FULL_PKGCONFIGDIR ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
++  set(VPL_INSTALL_PKGCONFIGDIR ${CMAKE_INSTALL_PREFIX}/libdata/pkgconfig)
++  set(VPL_INSTALL_FULL_PKGCONFIGDIR ${CMAKE_INSTALL_PREFIX}/libdata/pkgconfig)
+ else()
+   gnuinstalldirs_get_absolute_install_dir(
+     VPL_INSTALL_FULL_PKGCONFIGDIR VPL_INSTALL_PKGCONFIGDIR
