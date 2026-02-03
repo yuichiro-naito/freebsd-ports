@@ -26,7 +26,7 @@ lib/cmake/vpl/VPLConfig.cmake
 lib/cmake/vpl/VPLConfigVersion.cmake
 lib/libvpl.so
 lib/libvpl.so.2
-lib/libvpl.so.2.15
+lib/libvpl.so.2.16
 libdata/pkgconfig/vpl.pc
 %%DATADIR%%/examples/api1x_core/legacy-decode/CMakeLists.txt
 %%DATADIR%%/examples/api1x_core/legacy-decode/License.txt

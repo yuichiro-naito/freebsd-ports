@@ -1,6 +1,6 @@
 PORTNAME=	libvpl
 DISTVERSIONPREFIX=	v
-DISTVERSION=	2.15.0
+DISTVERSION=	2.16.0
 CATEGORIES=	multimedia
 
 MAINTAINER=	naito.yuichiro@gmail.com
