@@ -1,4 +1,4 @@
---- libvpl/src/mfx_dispatcher_vpl_lowlatency.cpp.orig	2025-04-18 15:44:33 UTC
+--- libvpl/src/mfx_dispatcher_vpl_lowlatency.cpp.orig	2025-12-17 23:04:39 UTC
 +++ libvpl/src/mfx_dispatcher_vpl_lowlatency.cpp
 @@ -18,7 +18,7 @@
          #define LIB_ONEVPL L"libmfx64-gen.dll"
@@ -9,7 +9,7 @@
      // Linux x64
      #define LIB_ONEVPL "libmfx-gen.so.1.2"
      #define LIB_MSDK   "libmfxhw64.so.1"
-@@ -191,12 +191,14 @@ mfxStatus LoaderCtxVPL::LoadLibsFromMultipleDirs(LibTy
+@@ -191,16 +191,20 @@ mfxStatus LoaderCtxVPL::LoadLibsFromMultipleDirs(LibTy
  }
  
  mfxStatus LoaderCtxVPL::LoadLibsFromMultipleDirs(LibType libType) {
@@ -24,4 +24,10 @@
 +#endif
          "/lib",
          "/usr/lib",
++        "/usr/local/lib",
          "/lib64",
+         "/usr/lib64",
++        "/usr/local/lib64",
+     };
+ 
+     // clang-format on
